@@ -35,8 +35,8 @@ def process_image(msg):
         bridge = CvBridge()
         orig = bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
 
- 	hsvLower_y = np.array([30, 20, 40])    
- 	hsvUpper_y = np.array([110, 240 ,240])   
+ 	hsvLower_y = np.array([30, 50, 80])    #20,40
+ 	hsvUpper_y = np.array([100, 240 ,240])   #240,240
      
  	hsvLower_m = np.array([60, 0, 0])   
  	hsvUpper_m = np.array([100, 240,240])  

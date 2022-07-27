@@ -33,13 +33,14 @@ def process_image(msg):
         bridge = CvBridge()
         orig = bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
 
- 	hsvLower_y = np.array([30, 20, 40])    
- 	hsvUpper_y = np.array([110, 240 ,240]) 
+
+ 	hsvLower_y = np.array([30, 50, 80])    #20,40
+ 	hsvUpper_y = np.array([100, 240 ,240])   #240,240
      
  	hsvLower_m = np.array([60, 0, 0])   
  	hsvUpper_m = np.array([100, 240,240])  
      
- 	hsvLower_c = np.array([106, 10, 0])    
+ 	hsvLower_c = np.array([106, 50, 0])    
  	hsvUpper_c = np.array([176, 240 ,240])
 
         hsv = cv2.cvtColor(orig, cv2.COLOR_BGR2HSV)
@@ -97,7 +98,7 @@ def process_image(msg):
  	white_area_m=cv2.countNonZero(moji_m_2)
  	white_area_c=cv2.countNonZero(moji_c_2)
 
-	builder = pyocr.builders.TextBuilder(tesseract_layout=5)
+	builder = pyocr.builders.TextBuilder(tesseract_layout=6)
 	result = tool.image_to_string(pil_img, lang="eng", builder=builder)
 
         if 'c' in result:
@@ -114,19 +115,21 @@ def process_image(msg):
 	print(result)
 
 
-	if white_area_y > 1000:
-		if white_area_y > 1000 and white_area_y < 1500:
-			print('R_Yello_B')
-			b=5
-		elif 'C' in result:
-			print('R_Yello_C')
-			b=2
-		elif 'B' in result:
-			print('R_Yello_B')
-			b=5
-		elif 'A' in result:
-			print('R_Yello_A')
-			b=8
+	if white_area_y > 1550 and white_area_y < 2100:
+		print('R_Yello_C')
+		b=2
+	elif white_area_y > 1000 and white_area_y < 1500:
+		print('R_Yello_B')
+		b=5
+	elif 'C' in result:
+		print('R_Yello_C')
+		b=2
+	elif 'B' in result:
+		print('R_Yello_B')
+		b=5
+	elif 'A' in result:
+		print('R_Yello_A')
+		b=8
 
 	if white_area_m > 1000:
 		if white_area_m > 1000 and white_area_m < 1500:

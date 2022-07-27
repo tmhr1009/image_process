@@ -14,35 +14,39 @@ from std_msgs.msg import Int8
 tools = pyocr.get_available_tools()
 tool = tools[0]
 
-p1 = np.array([481, 272])
-p2 = np.array([637, 275])
-p3 = np.array([455, 364])
-p4 = np.array([628, 364])
+p1 = np.array([361, 270])
+p2 = np.array([524, 274])
+p3 = np.array([314, 366])
+p4 = np.array([500, 368])
 
 src = np.float32([p1, p2, p3, p4])
 dst = np.float32([[0,0],[100,0],[0,100],[100,100]])
 
 M = cv2.getPerspectiveTransform(src, dst)
 kernel = np.ones((3, 3), np.uint8)
+  
+pub3=rospy.Publisher('img_l',Int8,queue_size=10)
 
-pub2=rospy.Publisher('img_c',Int8,queue_size=10)    
-b=0
+
 
 def process_image(msg):
     try:
+	a=0
         bridge = CvBridge()
         orig = bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
 
  	hsvLower_y = np.array([30, 50, 80])    #20,40
  	hsvUpper_y = np.array([100, 240 ,240])   #240,240
-     
+
  	hsvLower_m = np.array([60, 0, 0])   
- 	hsvUpper_m = np.array([100, 240, 240])  
+ 	hsvUpper_m = np.array([100, 240,240])  
      
  	hsvLower_c = np.array([106, 10, 0])    
  	hsvUpper_c = np.array([176, 240 ,240])
 
         hsv = cv2.cvtColor(orig, cv2.COLOR_BGR2HSV)
+	my_debug = cv2.warpPerspective(orig, M,(100,100))
+	cv2.imshow('img_L',my_debug)
 
         hsv_mask_y = cv2.inRange(orig, hsvLower_y, hsvUpper_y)
  	hsv_mask_m = cv2.inRange(orig, hsvLower_m, hsvUpper_m)
@@ -108,26 +112,44 @@ def process_image(msg):
             result = 'B'
         else:
             result = 'A'
-
-	print(result)
-	print(white_area_y)
 	
-	if white_area_y > 1550:
-		print('Yello_C')
-		a=2
-	elif white_area_y > 1000 and white_area_y < 1500:
-		print('Yello_B')
-		a=5
-	elif 'C' in result:
-		print('Yello_C')
-		a=2
-	elif 'B' in result:
-		print('Yello_B')
-		a=5
-	elif 'A' in result:
-		print('Yello_A')
-		a=8
+	print(result)
 
+
+	if white_area_y > 1800 and white_area_y < 2100:
+		print('L_Yellow_A')
+		b=2
+	if white_area_y > 1000 and white_area_y < 1750:
+		print('L_Yellow_B')
+		b=5
+	if white_area_y > 2250:
+		print('L_Yellow_C')
+		b=8
+
+	if white_area_m > 1800 and white_area_m < 2100:
+		print('L_Magenta_A')
+		b=1
+	if white_area_m > 1000 and white_area_m < 1750:
+		print('L_Magenta_B')
+		b=4
+	if white_area_m > 2250:
+		print('L_Magenta_C')
+		b=7
+
+	if white_area_c > 1800 and white_area_c < 2100:
+		print('L_Cyan_A')
+		b=0
+	if white_area_c > 1000 and white_area_c < 1750:
+		print('L_Cyan_B')
+		b=3
+	if white_area_c > 2250:
+		print('L_Cyan_C')
+		b=6
+
+
+        print(white_area_y)
+
+	
 	# if white_area_y > 1800 and white_area_y < 2100:
 	# 	print('L_Yellow_A')
 	# 	a=2
@@ -138,48 +160,39 @@ def process_image(msg):
 	# 	print('L_Yellow_C')
 	# 	a=8
 
-	if white_area_m > 1000:
-		if white_area_m > 1000 and white_area_m < 1500:
-			print('Magenta_B')
-			a=4
-		elif 'C' in result:
-			print('Magenta_C')
-			a=1
-		elif 'B' in result:
-			print('Magenta_B')
-			a=4
-		elif 'A' in result:
-			print('Magenta_A')
-			a=7
+	# if white_area_m > 1800 and white_area_m < 2100:
+	# 	print('L_Magenta_A')
+	# 	a=1
+	# if white_area_m > 1000 and white_area_m < 1500:
+	# 	print('L_Magenta_B')
+	# 	a=4
+	# if white_area_m > 2250:
+	# 	print('L_Magenta_C')
+	# 	a=7
 
+	# if white_area_c > 1800 and white_area_c < 2100:
+	# 	print('L_Cyan_A')
+	# 	a=0
+	# if white_area_c > 1000 and white_area_c < 1500:
+	# 	print('L_Cyan_B')
+	# 	a=3
+	# if white_area_c > 2250:
+	# 	print('L_Cyan_C')
+	# 	a=6
+	
+	pub3.publish(a)
 
-	if white_area_c > 1000:
-		if white_area_c > 1000 and white_area_c < 1500:
-			print('Cyan_B')
-			a=3
-		elif 'C' in result:
-			print('Cyan_C')
-			a=0
-		elif 'B' in result:
-			print('Cyan_B')
-			a=3
-		elif 'A' in result:
-			print('Cyan_A')
-			a=6
-
-	pub2.publish(b)
-
-	cv2.imshow('Y_R', moji_y)
-	# cv2.imshow('C_R', moji_c)
-	# cv2.imshow('M_R', moji_m)
+        #cv2.imshow('Y_L', moji_y)
+	#cv2.imshow('C_L', moji_c)
+	#cv2.imshow('M_L', moji_m)
 
 	#cv2.imshow('Y2', moji_y_2)
 	#cv2.imshow('C2', moji_c_2)
 	#cv2.imshow('M2', moji_m_2)
 
-	#cv2.imshow('m',hsv_mask_m)
+	cv2.imshow('m',hsv_mask_m)
  	cv2.imshow('y',hsv_mask_y)
- 	#cv2.imshow('c',hsv_mask_c)
+ 	# cv2.imshow('c',hsv_mask_c)
 	#cv2.imshow('img',orig)
 
 	#print(white_area_y)
@@ -194,7 +207,7 @@ def process_image(msg):
         #   result = 'C'
         #elif 'C' in result:
         #    result = 'C'
-        #elif 'E' in result:
+        #elif 'E' in result:S
         #    result = 'B'
         #else:
         #    result='A'
@@ -205,14 +218,18 @@ def process_image(msg):
         print err
 
 def start_node():
-    rospy.init_node('img_proc_R')
+    rospy.init_node('img_proc_L')
     rospy.loginfo('img_proc node started')
     rospy.Subscriber("/camera/color/image_raw/compressed", CompressedImage, process_image)
     rospy.spin()
+    
 
 if __name__ == '__main__':
     try:
         start_node()
     except rospy.ROSInterruptException:
         pass
+
+
+
 
